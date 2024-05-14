@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.templatetags.static import static
 
 
-from .models import Product
+from .models import Product, Order, OrderProduct
 
 
 def banners_list_api(request):
@@ -61,11 +61,33 @@ def product_list_api(request):
 
 def register_order(request):
     try:
-        data = json.loads(request.body.decode())
-        print(data)
+        order_details = json.loads(request.body.decode())
+        order_product_details = order_details.pop('products')
+
+        order = Order.objects.create(
+            client_name=order_details['firstname'],
+            client_lastname=order_details['lastname'],
+            address=order_details['address'],
+            phone=order_details['phonenumber'],
+        )
+
+        order_products = []
+
+        for product in order_product_details:
+            order_products.append(OrderProduct(
+                order=order,
+                product_id=product.get('product'),
+                quantity=product.get('quantity'),
+            ))
+
+        OrderProduct.objects.bulk_create(order_products)
+
+        print(order_details)
     except ValueError:
         return JsonResponse({
-            'error': 'Invalid JSON',
+            'error': 'Неверный JSON',
         })
     # TODO это лишь заглушка
+    # {'products': [], 'firstname': 'a', 'lastname': 'a', 'phonenumber': 'asd', 'address': 'as'}
+
     return JsonResponse({})
