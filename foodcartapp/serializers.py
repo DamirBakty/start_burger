@@ -11,10 +11,12 @@ class OrderProductSerializer(serializers.ModelSerializer):
             'id',
             'order',
             'product',
-            'quantity'
+            'quantity',
+            'price'
         )
         extra_kwargs = {
             'order': {'read_only': True},
+            'price': {'read_only': True},
         }
 
 
@@ -44,8 +46,10 @@ class OrderSerializer(serializers.ModelSerializer):
             phone=validated_data['phone'],
             address=validated_data['address']
         )
-        order_products = [
-            OrderProduct(order=order, **product_data) for product_data in order_products_details
-        ]
+        order_products = []
+        for product_data in order_products_details:
+            order_product = OrderProduct(order=order, **product_data)
+            order_product.set_price()
+            order_products.append(order_product)
         OrderProduct.objects.bulk_create(order_products)
         return order

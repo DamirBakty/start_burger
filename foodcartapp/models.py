@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
+from django.core.validators import MinValueValidator
 
 
 
@@ -144,10 +145,26 @@ class Order(models.Model):
 
 
 class OrderProduct(models.Model):
-    order = models.ForeignKey(to=Order, on_delete=models.CASCADE, verbose_name='Заказ', related_name='products')
-    product = models.ForeignKey(to=Product, on_delete=models.CASCADE, verbose_name='Товар')
-    quantity = models.PositiveSmallIntegerField(verbose_name='Количество')
-
+    order = models.ForeignKey(
+        to=Order,
+        on_delete=models.CASCADE,
+        verbose_name='Заказ',
+        related_name='products'
+    )
+    product = models.ForeignKey(
+        to=Product,
+        on_delete=models.CASCADE,
+        verbose_name='Товар'
+    )
+    quantity = models.PositiveSmallIntegerField(
+        verbose_name='Количество'
+    )
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        validators=[MinValueValidator(0.0)]
+    )
 
     class Meta:
         verbose_name = 'Товар Заказа'
@@ -155,3 +172,6 @@ class OrderProduct(models.Model):
 
     def __str__(self):
         return f"{self.order}"
+
+    def set_price(self):
+        self.price = self.product.price

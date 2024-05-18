@@ -92,10 +92,9 @@ def view_restaurants(request):
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.prefetch_related(
-        'products',
-        'products__product'
+        'products'
     ).annotate(
-        price_sum=Sum(F('products__quantity') * F('products__product__price'))
+        price_sum=Sum(F('products__quantity') * F('products__price'))
     ).all()
 
     return render(request, template_name='order_items.html', context={
