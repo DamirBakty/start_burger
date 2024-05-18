@@ -1,8 +1,11 @@
-import json
-
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.templatetags.static import static
+from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from .models import Product, Order, OrderProduct
 
@@ -60,10 +63,21 @@ def product_list_api(request):
 
 
 @api_view(['POST'])
+@transaction.atomic
 def register_order(request):
     try:
         order_details = request.data
-        order_product_details = order_details.pop('products')
+        order_product_details = order_details.get('products')
+
+        if not order_product_details:
+            return Response({
+                'products': 'Это обязательно поле'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(order_product_details, list)\
+            and not all(isinstance(item, dict) for item in order_product_details):
+            return Response({
+                'products': 'Неверный формат поля'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         client_name = order_details['firstname']
         client_lastname = order_details['lastname']
@@ -81,20 +95,25 @@ def register_order(request):
 
         order_products = []
 
-        for product in order_product_details:
+        for product_detail in order_product_details:
+            product_id = product_detail.get('product')
+            product = get_object_or_404(Product, id=product_id)
+
+            quantity = product_detail.get('quantity')
+
             order_products.append(OrderProduct(
                 order=order,
-                product_id=product.get('product'),
-                quantity=product.get('quantity'),
+                product=product,
+                quantity=quantity,
             ))
 
         OrderProduct.objects.bulk_create(order_products)
 
     except ValueError:
-        return JsonResponse({
+        return Response({
             'error': 'Неверный JSON',
-        })
+        }, status=status.HTTP_400_BAD_REQUEST)
 
-    return JsonResponse({
+    return Response({
         "message": "Заказ Создан"
-    })
+    }, status=status.HTTP_201_CREATED)
