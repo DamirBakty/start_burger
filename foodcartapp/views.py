@@ -73,25 +73,45 @@ def register_order(request):
             return Response({
                 'products': 'Это обязательно поле'
             }, status=status.HTTP_400_BAD_REQUEST)
-        if not isinstance(order_product_details, list)\
-            and not all(isinstance(item, dict) for item in order_product_details):
+
+        if not isinstance(order_product_details, list) and \
+            not all(isinstance(item, dict) for item in order_product_details):
             return Response({
                 'products': 'Неверный формат поля'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        client_name = order_details['firstname']
-        client_lastname = order_details['lastname']
-        address = order_details['address']
-        phone = order_details['phonenumber']
+        client_name = order_details.get('firstname')
+        client_lastname = order_details.get('lastname')
+        address = order_details.get('address')
+        phone = order_details.get('phonenumber')
 
-        order = Order(
-            client_name=client_name,
-            client_lastname=client_lastname,
-            address=address,
-            phone=phone
-        )
-        order.full_clean()
-        order.save()
+        if not isinstance(client_name, str):
+            return Response({
+                'firstname': 'Это поле должно содержать строку'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(client_lastname, str):
+            return Response({
+                'lastname': 'Это поле должно содержать строку'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(address, str):
+            return Response({
+                'address': 'Это поле должно содержать строку'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            order = Order(
+                client_name=client_name,
+                client_lastname=client_lastname,
+                address=address,
+                phone=phone
+            )
+            order.full_clean()
+            order.save()
+        except ValidationError as e:
+            return Response(
+                e.message_dict,
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         order_products = []
 
