@@ -1,13 +1,10 @@
-from django.core.exceptions import ValidationError
-from django.db import transaction
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.templatetags.static import static
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Product, Order, OrderProduct
+from .models import Product
 from .serializers import OrderSerializer
 
 
@@ -64,7 +61,6 @@ def product_list_api(request):
 
 
 @api_view(['POST'])
-@transaction.atomic
 def register_order(request):
     order_serializer = OrderSerializer(data=request.data)
     order_serializer.is_valid(raise_exception=True)

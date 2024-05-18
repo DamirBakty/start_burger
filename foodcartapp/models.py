@@ -138,6 +138,10 @@ class Order(models.Model):
     def __str__(self):
         return self.address
 
+    @property
+    def client_full_name(self):
+        return f"{self.client_name} {self.client_lastname}"
+
 
 class OrderProduct(models.Model):
     order = models.ForeignKey(to=Order, on_delete=models.CASCADE, verbose_name='Заказ', related_name='products')
