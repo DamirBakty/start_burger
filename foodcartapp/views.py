@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .models import Product, Order, OrderProduct
+from .serializers import OrderSerializer
 
 
 def banners_list_api(request):
@@ -65,75 +66,9 @@ def product_list_api(request):
 @api_view(['POST'])
 @transaction.atomic
 def register_order(request):
-    try:
-        order_details = request.data
-        order_product_details = order_details.get('products')
-
-        if not order_product_details:
-            return Response({
-                'products': 'Это обязательно поле'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        if not isinstance(order_product_details, list) and \
-            not all(isinstance(item, dict) for item in order_product_details):
-            return Response({
-                'products': 'Неверный формат поля'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        client_name = order_details.get('firstname')
-        client_lastname = order_details.get('lastname')
-        address = order_details.get('address')
-        phone = order_details.get('phonenumber')
-
-        if not isinstance(client_name, str):
-            return Response({
-                'firstname': 'Это поле должно содержать строку'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        if not isinstance(client_lastname, str):
-            return Response({
-                'lastname': 'Это поле должно содержать строку'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        if not isinstance(address, str):
-            return Response({
-                'address': 'Это поле должно содержать строку'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            order = Order(
-                client_name=client_name,
-                client_lastname=client_lastname,
-                address=address,
-                phone=phone
-            )
-            order.full_clean()
-            order.save()
-        except ValidationError as e:
-            return Response(
-                e.message_dict,
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        order_products = []
-
-        for product_detail in order_product_details:
-            product_id = product_detail.get('product')
-            product = get_object_or_404(Product, id=product_id)
-
-            quantity = product_detail.get('quantity')
-
-            order_products.append(OrderProduct(
-                order=order,
-                product=product,
-                quantity=quantity,
-            ))
-
-        OrderProduct.objects.bulk_create(order_products)
-
-    except ValueError:
-        return Response({
-            'error': 'Неверный JSON',
-        }, status=status.HTTP_400_BAD_REQUEST)
-
+    order_serializer = OrderSerializer(data=request.data)
+    order_serializer.is_valid(raise_exception=True)
+    order_serializer.save()
     return Response({
         "message": "Заказ Создан"
     }, status=status.HTTP_201_CREATED)
