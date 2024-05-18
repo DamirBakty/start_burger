@@ -8,14 +8,18 @@ class OrderProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderProduct
         fields = (
+            'id',
             'order',
             'product',
             'quantity'
         )
+        extra_kwargs = {
+            'order': {'read_only': True},
+        }
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    products = OrderProductSerializer(many=True)
+    products = OrderProductSerializer(many=True, allow_empty=False)
     firstname = serializers.CharField(source='client_name')
     lastname = serializers.CharField(source='client_lastname')
     phonenumber = PhoneNumberField(source='phone')
@@ -23,6 +27,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = (
+            'id',
             'firstname',
             'lastname',
             'address',
@@ -30,11 +35,6 @@ class OrderSerializer(serializers.ModelSerializer):
             'products'
         )
 
-
-    def validate_products(self, value):
-        if not value:
-            raise serializers.ValidationError("Это поле не может быть пустым")
-        return value
 
     def create(self, validated_data):
         order_products_details = validated_data.pop('products')
