@@ -2,7 +2,7 @@ import json
 
 from django.http import JsonResponse
 from django.templatetags.static import static
-
+from rest_framework.decorators import api_view
 
 from .models import Product, Order, OrderProduct
 
@@ -59,17 +59,25 @@ def product_list_api(request):
     })
 
 
+@api_view(['POST'])
 def register_order(request):
     try:
-        order_details = json.loads(request.body.decode())
+        order_details = request.data
         order_product_details = order_details.pop('products')
 
-        order = Order.objects.create(
-            client_name=order_details['firstname'],
-            client_lastname=order_details['lastname'],
-            address=order_details['address'],
-            phone=order_details['phonenumber'],
+        client_name = order_details['firstname']
+        client_lastname = order_details['lastname']
+        address = order_details['address']
+        phone = order_details['phonenumber']
+
+        order = Order(
+            client_name=client_name,
+            client_lastname=client_lastname,
+            address=address,
+            phone=phone
         )
+        order.full_clean()
+        order.save()
 
         order_products = []
 
@@ -82,12 +90,11 @@ def register_order(request):
 
         OrderProduct.objects.bulk_create(order_products)
 
-        print(order_details)
     except ValueError:
         return JsonResponse({
             'error': 'Неверный JSON',
         })
-    # TODO это лишь заглушка
-    # {'products': [], 'firstname': 'a', 'lastname': 'a', 'phonenumber': 'asd', 'address': 'as'}
 
-    return JsonResponse({})
+    return JsonResponse({
+        "message": "Заказ Создан"
+    })
