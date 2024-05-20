@@ -159,10 +159,28 @@ class Order(models.Model):
         blank=True,
         verbose_name='Комментарий'
     )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        db_index=True,
+        verbose_name='Время создания'
+    )
+    called_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        db_index=True,
+        verbose_name='Время звонка'
+    )
+    delivered_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        db_index=True,
+        verbose_name='Время доставки'
+    )
 
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
+        ordering = ['-created_at']
 
     def __str__(self):
         return self.address

@@ -122,6 +122,26 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [
         OrderProductInline
     ]
+    fieldsets = (
+        (None, {
+            'fields': (
+                'client_name',
+                'client_lastname',
+                'phone',
+                'address',
+                'status',
+                'comment',
+                'called_at',
+                'delivered_at'
+            )
+        }),
+        ('Important Dates', {
+            'fields': ('created_at',)
+        }),
+    )
+
+    # Set readonly fields to prevent modification of created_at
+    readonly_fields = ('created_at',)
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
