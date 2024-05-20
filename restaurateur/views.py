@@ -99,6 +99,22 @@ def view_orders(request):
         status=Order.StatusChoices.DELIVERED
     )
 
+    restaurants = Restaurant.objects.prefetch_related(
+        'menu_items',
+        'menu_items__product'
+    )
+
+    for order in orders:
+        order_products_ids = set(order.products.values_list('product_id', flat=True))
+        available_restaurants = []
+
+        for restaurant in restaurants:
+            menu_products_ids = set(restaurant.menu_items.values_list('product_id', flat=True))
+            if menu_products_ids.intersection(order_products_ids):
+                available_restaurants.append(restaurant)
+
+        order.available_restaurants = available_restaurants
+
     return render(request, template_name='order_items.html', context={
         'order_items': orders,
         'currentUrl': request.path,

@@ -1,7 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models
-from phonenumber_field.modelfields import PhoneNumberField
 from django.utils.translation import gettext_lazy as _
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class Restaurant(models.Model):
@@ -185,6 +185,15 @@ class Order(models.Model):
         default=PaymentChoices.Cash,
         max_length=12,
         db_index=True,
+        verbose_name='Способ оплаты'
+    )
+    restaurant = models.ForeignKey(
+        to=Restaurant,
+        related_name='orders',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Ресторан'
     )
 
     class Meta:

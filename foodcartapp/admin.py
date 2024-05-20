@@ -138,10 +138,11 @@ class OrderAdmin(admin.ModelAdmin):
                 'created_at',
                 'called_at',
                 'delivered_at',
+                'restaurant'
             )
         }),
     )
-
+    autocomplete_fields = ['restaurant']
     readonly_fields = ('created_at',)
 
     def save_formset(self, request, form, formset, change):
