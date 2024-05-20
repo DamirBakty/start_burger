@@ -152,6 +152,12 @@ class Order(models.Model):
         default=StatusChoices.ACCEPTED,
         max_length=10,
         db_index=True,
+        verbose_name='Статус'
+    )
+    comment = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name='Комментарий'
     )
 
     class Meta:
@@ -185,7 +191,8 @@ class OrderProduct(models.Model):
         max_digits=10,
         decimal_places=2,
         blank=True,
-        validators=[MinValueValidator(0.0)]
+        validators=[MinValueValidator(0.0)],
+        verbose_name='Стоимость'
     )
 
     class Meta:
