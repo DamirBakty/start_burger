@@ -3,6 +3,9 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
 
+from star_burger.settings import API_KEY
+from .yandex_geo import fetch_coordinates, get_distance_km
+
 
 class Restaurant(models.Model):
     name = models.CharField(
@@ -26,6 +29,13 @@ class Restaurant(models.Model):
 
     def __str__(self):
         return self.name
+
+    def set_distance(self, order_address):
+        restaurant_coordinates = fetch_coordinates(API_KEY, self.address)
+        order_coordinates = fetch_coordinates(API_KEY, order_address)
+        if order_coordinates and restaurant_coordinates:
+            distance = get_distance_km(restaurant_coordinates, order_coordinates)
+            self.distance = round(distance, 3)
 
 
 class ProductQuerySet(models.QuerySet):

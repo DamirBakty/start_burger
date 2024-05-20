@@ -111,7 +111,10 @@ def view_orders(request):
         for restaurant in restaurants:
             menu_products_ids = set(restaurant.menu_items.values_list('product_id', flat=True))
             if menu_products_ids.intersection(order_products_ids):
+                restaurant.set_distance(order.address)
                 available_restaurants.append(restaurant)
+
+        available_restaurants.sort(key=lambda x: x.distance)
 
         order.available_restaurants = available_restaurants
 
