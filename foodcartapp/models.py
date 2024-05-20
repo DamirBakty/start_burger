@@ -1,6 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
+from django.utils.translation import gettext_lazy as _
 
 
 class Restaurant(models.Model):
@@ -125,10 +126,33 @@ class RestaurantMenuItem(models.Model):
 
 
 class Order(models.Model):
-    client_name = models.CharField(max_length=50, verbose_name='Имя')
-    client_lastname = models.CharField(max_length=50, verbose_name='Фамилия')
-    phone = PhoneNumberField(verbose_name='Телефон')
-    address = models.CharField(max_length=100, verbose_name='Адрес доставки')
+    class StatusChoices(models.TextChoices):
+        ACCEPTED = 'Accepted', _('Принят')
+        COOKING = 'Cooking', _('Готовится')
+        DELIVERING = 'Delivering', _('В пути')
+        DELIVERED = 'Delivered', _('Доставлен')
+
+    client_name = models.CharField(
+        max_length=50,
+        verbose_name='Имя'
+    )
+    client_lastname = models.CharField(
+        max_length=50,
+        verbose_name='Фамилия'
+    )
+    phone = PhoneNumberField(
+        verbose_name='Телефон'
+    )
+    address = models.CharField(
+        max_length=100,
+        verbose_name='Адрес доставки'
+    )
+    status = models.CharField(
+        choices=StatusChoices.choices,
+        default=StatusChoices.ACCEPTED,
+        max_length=10,
+        db_index=True,
+    )
 
     class Meta:
         verbose_name = 'Заказ'

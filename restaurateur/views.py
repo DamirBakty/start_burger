@@ -95,7 +95,9 @@ def view_orders(request):
         'products'
     ).annotate(
         price_sum=Sum(F('products__quantity') * F('products__price'))
-    ).all()
+    ).exclude(
+        status=Order.StatusChoices.DELIVERED
+    )
 
     return render(request, template_name='order_items.html', context={
         'order_items': orders,
