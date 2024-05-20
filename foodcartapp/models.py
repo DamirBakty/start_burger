@@ -132,6 +132,10 @@ class Order(models.Model):
         DELIVERING = 'Delivering', _('В пути')
         DELIVERED = 'Delivered', _('Доставлен')
 
+    class PaymentChoices(models.TextChoices):
+        Online = 'Online', _('Электронно')
+        Cash = 'Cash', _('Наличными')
+
     client_name = models.CharField(
         max_length=50,
         verbose_name='Имя'
@@ -175,6 +179,12 @@ class Order(models.Model):
         blank=True,
         db_index=True,
         verbose_name='Время доставки'
+    )
+    payment_method = models.CharField(
+        choices=PaymentChoices.choices,
+        default=PaymentChoices.Cash,
+        max_length=12,
+        db_index=True,
     )
 
     class Meta:
