@@ -7,7 +7,10 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
 
+from distances.models import Distance
 from foodcartapp.models import Product, Restaurant, Order
+from foodcartapp.yandex_geo import fetch_coordinates, get_distance_km
+from star_burger.settings import API_KEY
 
 
 class Login(forms.Form):
@@ -96,26 +99,43 @@ def view_orders(request):
     ).annotate(
         price_sum=Sum(F('products__quantity') * F('products__price'))
     ).exclude(
-        status=Order.StatusChoices.DELIVERED
+        status=Order.StatusChoices.DELIVERED,
     )
 
     restaurants = Restaurant.objects.prefetch_related(
         'menu_items',
-        'menu_items__product'
+        'menu_items__product',
+        'distances'
     )
 
     for order in orders:
         order_products_ids = set(order.products.values_list('product_id', flat=True))
         available_restaurants = []
+        order.products.select_related('product').filter(
+            product__menu_items__product_id__in=order_products_ids,
+        )
 
         for restaurant in restaurants:
             menu_products_ids = set(restaurant.menu_items.values_list('product_id', flat=True))
             if menu_products_ids.intersection(order_products_ids):
-                restaurant.set_distance(order.address)
+                try:
+                    distance = Distance.objects.get(
+                        restaurant=restaurant,
+                        order_address=order.address,
+                    )
+                except Distance.DoesNotExist:
+                    restaurant_coordinates = fetch_coordinates(API_KEY, restaurant.address)
+                    order_coordinates = fetch_coordinates(API_KEY, order.address)
+                    distance_in_km = get_distance_km(restaurant_coordinates, order_coordinates)
+                    distance = Distance.objects.create(
+                        restaurant=restaurant,
+                        order_address=order.address,
+                        distance=distance_in_km
+                    )
+                restaurant.distance = distance.distance
                 available_restaurants.append(restaurant)
 
-        available_restaurants.sort(key=lambda x: x.distance)
-
+        available_restaurants = sorted(available_restaurants, key=lambda x: x.distance)
         order.available_restaurants = available_restaurants
 
     return render(request, template_name='order_items.html', context={

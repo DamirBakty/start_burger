@@ -1,5 +1,5 @@
 {% extends 'base_restaurateur_page.html' %}
-
+{% load restaurant_tags %}
 {% block title %}Необработанные заказы | Star Burger{% endblock %}
 
 {% block content %}
@@ -30,7 +30,7 @@
           <td>{{ item.id }}</td>
           <td>{{ item.get_status_display }}</td>
           <td>{{ item.get_payment_method_display }}</td>
-          <td>{{ item.price_sum }}</td>
+          <td>{{ item.price_sum|floatformat:2 }}</td>
           <td>{{ item.client_full_name }}</td>
           <td>{{ item.phone }}</td>
           <td>{{ item.address }}</td>
@@ -40,9 +40,14 @@
               Готовит {{ item.restaurant }}
             {% else %}
               <ul>Может быть приготовлен ресторанами:
-                {% for available_restaurant in item.available_restaurants %}
-                  <li style="margin-left: 30px">{{ available_restaurant }} - {{ available_restaurant.distance }}км</li>
-                {% endfor %}
+                {% with address=item.address %}
+                  {% for available_restaurant in item.available_restaurants %}
+                    <li style="margin-left: 30px">
+                      {{ available_restaurant }}
+                      - {{ available_restaurant|get_restaurant_distance:item.address|floatformat:2 }} км
+                    </li>
+                  {% endfor %}
+                {% endwith %}
               </ul>
             {% endif %}
           </td>
