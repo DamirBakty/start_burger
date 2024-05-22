@@ -1,14 +1,15 @@
+from collections import defaultdict
+
 from django import forms
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Sum, F
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
 
 from distances.models import Distance
-from foodcartapp.models import Product, Restaurant, Order
+from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
 from foodcartapp.yandex_geo import fetch_coordinates, get_distance_km
 from star_burger.settings import API_KEY
 
@@ -94,13 +95,21 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.prefetch_related(
+    orders = Order.objects.order_price().prefetch_related(
         'products'
-    ).annotate(
-        price_sum=Sum(F('products__quantity') * F('products__price'))
     ).exclude(
         status=Order.StatusChoices.DELIVERED,
     )
+
+    menu_items = RestaurantMenuItem.objects.prefetch_related(
+        'restaurant'
+    ).filter(
+        availability=True
+    )
+
+    restaurant_products = defaultdict(set)
+    for item in menu_items:
+        restaurant_products[item.restaurant].add(item.product_id)
 
     restaurants = Restaurant.objects.prefetch_related(
         'menu_items',
@@ -115,9 +124,8 @@ def view_orders(request):
             product__menu_items__product_id__in=order_products_ids,
         )
 
-        for restaurant in restaurants:
-            menu_products_ids = set(restaurant.menu_items.values_list('product_id', flat=True))
-            if menu_products_ids.intersection(order_products_ids):
+        for restaurant, products in restaurant_products.items():
+            if products.intersection(order_products_ids):
                 try:
                     distance = Distance.objects.get(
                         restaurant=restaurant,
@@ -132,10 +140,13 @@ def view_orders(request):
                         order_address=order.address,
                         distance=distance_in_km
                     )
-                restaurant.distance = distance.distance
-                available_restaurants.append(restaurant)
+                restaurant_info = {
+                    'name': restaurant.name,
+                    'distance': distance.distance,
+                }
+                available_restaurants.append(restaurant_info)
 
-        available_restaurants = sorted(available_restaurants, key=lambda x: x.distance)
+        available_restaurants = sorted(available_restaurants, key=lambda r: r['distance'])
         order.available_restaurants = available_restaurants
 
     return render(request, template_name='order_items.html', context={

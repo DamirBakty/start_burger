@@ -1,5 +1,6 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import Sum, F, FloatField
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -125,6 +126,14 @@ class RestaurantMenuItem(models.Model):
         return f"{self.restaurant.name} - {self.product.name}"
 
 
+class OrderQuerySet(models.QuerySet):
+    def order_price(self):
+        return self.annotate(
+            price_sum=Sum(F('products__price') * F('products__quantity'),
+                          output_field=FloatField())
+        )
+
+
 class Order(models.Model):
     class StatusChoices(models.TextChoices):
         ACCEPTED = 'Accepted', _('Принят')
@@ -196,6 +205,8 @@ class Order(models.Model):
         verbose_name='Ресторан'
     )
 
+    objects = OrderQuerySet.as_manager()
+
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
@@ -222,6 +233,8 @@ class OrderProduct(models.Model):
         verbose_name='Товар'
     )
     quantity = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1)],
+        default=1,
         verbose_name='Количество'
     )
     price = models.DecimalField(

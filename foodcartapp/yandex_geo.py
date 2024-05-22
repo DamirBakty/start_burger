@@ -21,5 +21,8 @@ def fetch_coordinates(apikey, address):
 
 
 def get_distance_km(first_coordinate, second_coordinate):
-    distance_km = distance.distance(first_coordinate, second_coordinate).km
-    return distance_km
+    try:
+        distance_km = distance.distance(first_coordinate, second_coordinate).km
+        return distance_km
+    except ValueError:
+        return None
