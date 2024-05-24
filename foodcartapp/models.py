@@ -168,7 +168,7 @@ class Order(models.Model):
         verbose_name='Статус'
     )
     comment = models.TextField(
-        null=True,
+        null=False,
         blank=True,
         verbose_name='Комментарий'
     )
