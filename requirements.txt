@@ -8,3 +8,4 @@ requests==2.31.0
 geopy==2.4.1
 phonenumbers==8.13.37
 gunicorn==22.0.0
+rollbar==1.0.0

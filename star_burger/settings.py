@@ -1,4 +1,5 @@
 import os
+import re
 
 import dj_database_url
 from environs import Env
@@ -15,6 +16,8 @@ DEBUG = env.bool('DEBUG', False)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
 
 API_KEY = env.str('API_KEY')
+ROLLBAR_TOKEN = env.str('ROLLBAR_TOKEN')
+ROLLBAR_ENVIRONMENT = env.str('ROLLBAR_ENVIRONMENT', 'development')
 
 INSTALLED_APPS = [
     'foodcartapp.apps.FoodcartappConfig',
@@ -41,6 +44,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'rollbar.contrib.django.middleware.RollbarNotifierMiddlewareExcluding404',
 ]
 
 ROOT_URLCONF = 'star_burger.urls'
@@ -87,6 +91,17 @@ DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:////{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
     )
+}
+
+ROLLBAR = {
+    'access_token': ROLLBAR_TOKEN,
+    'environment': ROLLBAR_ENVIRONMENT,
+    'code_version': '1.0',
+    'root': BASE_DIR,
+    'ignorable_404_urls': (
+        re.compile('/index\.php'),
+        re.compile('/foobar'),
+    ),
 }
 
 AUTH_PASSWORD_VALIDATORS = [
