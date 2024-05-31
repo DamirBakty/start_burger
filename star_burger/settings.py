@@ -19,11 +19,7 @@ API_KEY = env.str('API_KEY')
 ROLLBAR_TOKEN = env.str('ROLLBAR_TOKEN')
 ROLLBAR_ENVIRONMENT = env.str('ROLLBAR_ENVIRONMENT', 'development')
 
-DB_USER = env.str('DB_USER')
-DB_PASSWORD = env.str('DB_PASSWORD')
-DB_NAME = env.str('DB_NAME')
-DB_HOST = env.str('DB_HOST')
-DB_PORT = env.int('DB_PORT')
+DB_URL = env.str('DB_URL')
 
 INSTALLED_APPS = [
     'foodcartapp.apps.FoodcartappConfig',
@@ -95,7 +91,7 @@ MEDIA_URL = '/media/'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=f'postgres://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}',
+        default=DB_URL,
     ),
 }
 
