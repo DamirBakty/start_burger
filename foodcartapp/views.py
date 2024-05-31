@@ -65,7 +65,7 @@ def register_order(request):
     order_serializer = OrderSerializer(data=request.data)
     order_serializer.is_valid(raise_exception=True)
     order = order_serializer.save()
-    a = 1 / 0
+
     order_data = OrderSerializer(order).data
 
     return Response(order_data, status=status.HTTP_201_CREATED)
