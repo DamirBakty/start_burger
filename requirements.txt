@@ -9,3 +9,5 @@ geopy==2.4.1
 phonenumbers==8.13.37
 gunicorn==22.0.0
 rollbar==1.0.0
+django-database-url==1.0.3
+psycopg2-binary==2.9.9
