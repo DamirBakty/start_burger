@@ -150,7 +150,6 @@ Parcel будет следить за файлами в каталоге `bundle
 - `API_KEY` — API ключ из Яндекс Геокодер.
 - `ROLLBAR_TOKEN` — Токен из [Rollbar](https://rollbar.com/) для логирования.
 - `ROLLBAR_ENVIRONMENT` — Мод для логирования в Rollbar. Примеры: test, development, production.
--
 
 ## Цели проекта
 
