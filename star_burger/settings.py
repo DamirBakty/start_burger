@@ -16,7 +16,7 @@ DEBUG = env.bool('DEBUG', False)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
 
 API_KEY = env.str('API_KEY')
-ROLLBAR_TOKEN = env.str('ROLLBAR_TOKEN')
+ROLLBAR_TOKEN = env.str('ROLLBAR_TOKEN', None)
 ROLLBAR_ENVIRONMENT = env.str('ROLLBAR_ENVIRONMENT', 'development')
 
 DB_URL = env.str('DB_URL')
