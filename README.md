@@ -153,11 +153,10 @@ Parcel будет следить за файлами в каталоге `bundle
 - `ROLLBAR_TOKEN` — Токен из [Rollbar](https://rollbar.com/) для логирования.
 - `ROLLBAR_ENVIRONMENT` — Мод для логирования в Rollbar. Примеры: test, development, production.
 - `DB_URL` — Ссылка для подключения к Базе Данных. Пример:`postgres://USER:PASSWORD@HOST:PORT/DB_NAME`
+- `POSTGRES_DB` — Название базы данных для docker контейнера
+- `POSTGRES_USER` — имя пользователь для базы данных
+- `POSTGRES_PASSWORD` — пароль пользователя для базы данных
+- `API_URL` — доменное имя для запуска на сервере
 
-## Цели проекта
-
-Код написан в учебных целях — это урок в курсе по Python и веб-разработке на сайте [Devman](https://dvmn.org). За основу был взят код проекта [FoodCart](https://github.com/Saibharath79/FoodCart).
-
-Где используется репозиторий:
-
-- Второй и третий урок [учебного курса Django](https://dvmn.org/modules/django/)
+## Как запустить проект на сервере через Docker контейнеры
+Запуск файла init-letsencrypt.sh будет собирать docker контейнеры и получать SSL сертификаты и поднимет сервер
