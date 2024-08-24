@@ -5,14 +5,13 @@ if ! [ -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-domains=(artreval.kz)
 rsa_key_size=4096
 data_path="./data/certbot"
 email="damir050602@gmail.com" # Adding a valid address is strongly recommended
 staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
 
 if [ -d "$data_path" ]; then
-  read -p "Existing data found for $domains. Continue and replace existing certificate? (y/N) " decision
+  read -p "Existing data found for artreval.kz. Continue and replace existing certificate? (y/N) " decision
   if [ "$decision" != "Y" ] && [ "$decision" != "y" ]; then
     exit
   fi
@@ -27,11 +26,11 @@ if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/
   echo
 fi
 
-echo "### Creating dummy certificate for $domains ..."
-path="/etc/letsencrypt/live/$domains"
-mkdir -p "$data_path/conf/live/$domains"
+echo "### Creating dummy certificate for artreval.kz ..."
+path="/etc/letsencrypt/live/artreval.kz"
+mkdir -p "$data_path/conf/live/artreval.kz"
 docker-compose run --rm --entrypoint "\
-  openssl req -x509 -nodes -newkey rsa:$rsa_key_size -days 1\
+  openssl req -x509 -nodes -newkey rsa:$rsa_key_size -days 30\
     -keyout '$path/privkey.pem' \
     -out '$path/fullchain.pem' \
     -subj '/CN=localhost'" certbot
@@ -42,20 +41,17 @@ echo "### Starting nginx ..."
 docker-compose up --force-recreate -d nginx
 echo
 
-echo "### Deleting dummy certificate for $domains ..."
+echo "### Deleting dummy certificate for artreval.kz ..."
 docker-compose run --rm --entrypoint "\
-  rm -Rf /etc/letsencrypt/live/$domains && \
-  rm -Rf /etc/letsencrypt/archive/$domains && \
-  rm -Rf /etc/letsencrypt/renewal/$domains.conf" certbot
+  rm -Rf /etc/letsencrypt/live/artreval.kz && \
+  rm -Rf /etc/letsencrypt/archive/artreval.kz && \
+  rm -Rf /etc/letsencrypt/renewal/artreval.kz.conf" certbot
 echo
 
 
-echo "### Requesting Let's Encrypt certificate for $domains ..."
-#Join $domains to -d args
+echo "### Requesting Let's Encrypt certificate for artreval.kz ..."
+#Join artreval.kz to -d args
 domain_args="-d artreval.kz"
-for domain in "${domains[@]}"; do
-  domain_args="$domain_args -d $domain"
-done
 
 # Select appropriate email arg
 case "$email" in
