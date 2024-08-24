@@ -43,7 +43,7 @@ services:
     restart: unless-stopped
     env_file: .env
     volumes:
-      - ./static/:/static/
+      - ./staticfiles/:/static/
       - ./media/:/media/
       - ./data/nginx:/etc/nginx/conf.d
       - ./data/certbot/conf:/etc/letsencrypt
