@@ -18,6 +18,7 @@ services:
       - "8000"
     depends_on:
       - db
+      - parcel
 
   db:
     image: postgres:13.0-alpine
@@ -35,8 +36,6 @@ services:
     command: /bin/sh -c "npm ci --dev && ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url='./'"
     volumes:
       - .:/code
-    depends_on:
-      - web
 
   nginx:
     image: nginx:1.19-alpine
