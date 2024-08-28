@@ -11,9 +11,9 @@ services:
       - /bin/sh
       - /code/scripts/entrypoint.sh
     volumes:
-      - ..:/code
+      - .:/code
     env_file:
-      - ../prod/.env
+      - ./.env
     expose:
       - "8000"
     depends_on:
@@ -35,12 +35,12 @@ services:
     working_dir: /code
     command: /bin/sh -c "npm ci --dev && ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url='./'"
     volumes:
-      - ..:/code
+      - .:/code
 
   nginx:
     image: nginx:1.19-alpine
     restart: unless-stopped
-    env_file: ./prod/.env
+    env_file: .env
     volumes:
       - ./staticfiles/:/static/
       - ./media/:/media/
