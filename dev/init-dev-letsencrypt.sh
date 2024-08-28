@@ -6,7 +6,7 @@ if ! [ -x "$(command -v docker-compose)" ]; then
 fi
 
 rsa_key_size=4096
-data_path="./data/certbot"
+data_path="../data/certbot"
 email="damir050602@gmail.com" # Adding a valid address is strongly recommended
 staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
 
@@ -28,7 +28,7 @@ fi
 echo "### Creating dummy certificate for artreval.kz ..."
 path="/etc/letsencrypt/live/artreval.kz"
 mkdir -p "$data_path/conf/live/artreval.kz"
-docker-compose -f dev/docker-compose run --rm --entrypoint "\
+docker-compose run --rm --entrypoint "\
   openssl req -x509 -nodes -newkey rsa:$rsa_key_size -days 30 \
     -keyout '$path/privkey.pem' \
     -out '$path/fullchain.pem' \
@@ -40,7 +40,7 @@ docker-compose up --force-recreate -d nginx
 echo
 
 echo "### Deleting dummy certificate for artreval.kz ..."
-docker-compose -f dev/docker-compose run --rm --entrypoint "\
+docker-compose run --rm --entrypoint "\
   rm -Rf /etc/letsencrypt/live/artreval.kz && \
   rm -Rf /etc/letsencrypt/archive/artreval.kz && \
   rm -Rf /etc/letsencrypt/renewal/artreval.kz.conf" certbot
@@ -57,7 +57,7 @@ esac
 # Enable staging mode if needed
 if [ $staging != "0" ]; then staging_arg="--staging"; fi
 
-docker-compose -f dev/docker-compose run --rm --entrypoint "\
+docker-compose run --rm --entrypoint "\
   certbot certonly --webroot -w /var/www/certbot \
     $staging_arg \
     $email_arg \
@@ -68,4 +68,4 @@ docker-compose -f dev/docker-compose run --rm --entrypoint "\
 echo
 
 echo "### Reloading nginx ..."
-docker-compose -f dev/docker-compose exec nginx nginx -s reload
+docker-compose exec nginx nginx -s reload
